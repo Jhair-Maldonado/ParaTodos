@@ -34,20 +34,31 @@ const useSpeechRecognition = () => {
       setIsListening(false);
       // Map technical errors to user-friendly messages
       switch (event.error) {
+        case 'network':
+          setError('No pudimos conectar con el servicio de reconocimiento de voz. Puedes intentarlo nuevamente o continuar escribiendo.');
+          break;
         case 'not-allowed':
+          setError('No pudimos acceder al micrófono. Revisa los permisos del navegador o continúa escribiendo.');
+          break;
         case 'service-not-allowed':
-          setError('No pudimos acceder al micrófono. Puedes continuar usando la búsqueda escrita.');
+          setError('El reconocimiento de voz no está disponible en este navegador.');
           break;
         case 'no-speech':
           setError('No escuchamos ninguna búsqueda. Inténtalo nuevamente.');
           break;
-        case 'network':
-          setError('Error de conexión. Verifica tu internet y vuelve a intentarlo.');
+        case 'audio-capture':
+          setError('No encontramos un micrófono disponible.');
+          break;
+        case 'language-not-supported':
+          setError('El reconocimiento de voz no está disponible para este idioma.');
           break;
         default:
-          setError('Ocurrió un error con el micrófono. Puedes continuar escribiendo.');
+          setError('No pudimos completar la búsqueda por voz. Puedes continuar escribiendo.');
       }
-      console.error('Speech recognition error:', event.error); // Keep technical error in console
+      
+      if (import.meta.env.DEV) {
+        console.warn('SpeechRecognition:', event.error);
+      }
     };
 
     recognition.onend = () => {
@@ -73,8 +84,10 @@ const useSpeechRecognition = () => {
       try {
         recognitionInstance.start();
       } catch (e) {
-        console.error('Error al iniciar reconocimiento:', e);
-        setError('Ocurrió un error al iniciar el micrófono.');
+        if (import.meta.env.DEV) {
+          console.warn('Error al iniciar reconocimiento:', e);
+        }
+        setError('Ocurrió un error al iniciar el micrófono. Puedes continuar escribiendo.');
         setIsListening(false);
       }
     }

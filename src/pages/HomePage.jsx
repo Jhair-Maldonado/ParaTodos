@@ -15,9 +15,9 @@ const HomePage = () => {
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
-      <section className="relative bg-surface border-b border-border overflow-hidden">
+      <section className="relative isolate bg-surface border-b border-border overflow-hidden">
         {!simplifiedMode && (
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-50" aria-hidden="true"></div>
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-50" aria-hidden="true"></div>
         )}
         <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
           <div className="max-w-2xl animate-slide-up">
