@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Vibrant Accessible Colors */
+    --color-primary: #4f46e5; /* Indigo 600 */
+    --color-primary-hover: #4338ca; /* Indigo 700 */
+    --color-secondary: #0ea5e9; /* Sky 500 */
+    --color-background: #f8fafc; /* Slate 50 */
+    --color-surface: #ffffff; 
+    --color-surface-hover: #f1f5f9;
+    --color-text: #0f172a; /* Slate 900 */
+    --color-text-muted: #475569; /* Slate 600 */
+    --color-border: #e2e8f0; /* Slate 200 */
+    --color-error: #ef4444; /* Red 500 */
+  }
+
+  /* High Contrast Mode Variables */
+  .dark {
+    --color-primary: #818cf8; /* Indigo 400 */
+    --color-primary-hover: #a5b4fc; /* Indigo 300 */
+    --color-secondary: #38bdf8; /* Sky 400 */
+    --color-background: #020617; /* Slate 950 */
+    --color-surface: #0f172a; /* Slate 900 */
+    --color-surface-hover: #1e293b;
+    --color-text: #f8fafc; /* Slate 50 */
+    --color-text-muted: #cbd5e1; /* Slate 300 */
+    --color-border: #334155; /* Slate 700 */
+    --color-error: #f87171; /* Red 400 */
+  }
+
+  body {
+    @apply bg-background text-text transition-colors duration-300 antialiased selection:bg-primary selection:text-white;
+  }
+}
+
+/* Colorblind Filters */
+.filter-protanopia {
+  filter: url('#protanopia-filter');
+}
+
+.filter-deuteranopia {
+  filter: url('#deuteranopia-filter');
+}
+
+.filter-tritanopia {
+  filter: url('#tritanopia-filter');
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
