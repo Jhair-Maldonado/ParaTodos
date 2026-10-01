@@ -24,7 +24,6 @@ const ProductDetailPage = () => {
       setProduct(found);
       // Pre-select first color as default to reduce friction
       if (found.colors && found.colors.length > 0) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedColor(found.colors[0]);
       }
     } else {
