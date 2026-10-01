@@ -7,6 +7,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="about" element={<AboutPage />} />
           <Route path="*" element={
             <div className="container mx-auto px-4 py-24 text-center">
               <h2 className="text-4xl font-bold mb-4">Página no encontrada</h2>

@@ -196,6 +196,634 @@ export const allProducts = [
       { name: 'Única', available: true }
     ]
   }
+,
+  
+  {
+    id: 9,
+    name: "Polera Gris con Capucha",
+    category: "Poleras",
+    price: 45,
+    rating: 4.8,
+    imageColor: "bg-gray-400",
+    colorText: "Gris claro",
+    description: "Polera cómoda y abrigadora para días casuales.",
+    features: [
+      "Bolsillo canguro",
+      "Capucha ajustable"
+    ],
+    colors: [
+      {
+        id: "light-gray",
+        name: "Gris claro",
+        class: "bg-gray-400"
+      },
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 10,
+    name: "Vestido Casual Verde Oliva",
+    category: "Vestidos",
+    price: 65,
+    rating: 4.6,
+    imageColor: "bg-green-700",
+    colorText: "Verde oliva",
+    description: "Vestido ligero ideal para el verano o primavera.",
+    features: [
+      "Tela transpirable",
+      "Corte ajustado",
+      "Sin mangas"
+    ],
+    colors: [
+      {
+        id: "olive",
+        name: "Verde oliva",
+        class: "bg-green-700"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: false
+      }
+    ]
+  },
+  {
+    id: 11,
+    name: "Casaca Ligera Negra",
+    category: "Casacas",
+    price: 55,
+    rating: 4.3,
+    imageColor: "bg-gray-900",
+    colorText: "Negro",
+    description: "Casaca rompevientos perfecta para el clima de transición.",
+    features: [
+      "Resistente al agua",
+      "Bolsillos con cierre"
+    ],
+    colors: [
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      },
+      {
+        id: "navy",
+        name: "Azul marino",
+        class: "bg-blue-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      },
+      {
+        name: "XL",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 12,
+    name: "Polo Básico Blanco",
+    category: "Polos",
+    price: 15,
+    rating: 4.9,
+    imageColor: "bg-white border border-gray-300",
+    colorText: "Blanco",
+    description: "El clásico polo que combina con todo.",
+    features: [
+      "100% Algodón",
+      "Cuello V"
+    ],
+    colors: [
+      {
+        id: "white",
+        name: "Blanco",
+        class: "bg-white border border-gray-300"
+      },
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      },
+      {
+        name: "XL",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 13,
+    name: "Falda Plisada Azul Marino",
+    category: "Faldas",
+    price: 35,
+    rating: 4.4,
+    imageColor: "bg-blue-900",
+    colorText: "Azul marino",
+    description: "Falda plisada de cintura alta, elegante y cómoda.",
+    features: [
+      "Cierre lateral invisible",
+      "Forro interior"
+    ],
+    colors: [
+      {
+        id: "navy",
+        name: "Azul marino",
+        class: "bg-blue-900"
+      },
+      {
+        id: "burgundy",
+        name: "Rojo burdeos",
+        class: "bg-red-800"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: false
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 14,
+    name: "Shorts de Denim",
+    category: "Shorts",
+    price: 29.99,
+    rating: 4.5,
+    imageColor: "bg-blue-400",
+    colorText: "Celeste",
+    description: "Shorts clásicos de mezclilla para un look fresco.",
+    features: [
+      "Bordes deshilachados",
+      "5 bolsillos"
+    ],
+    colors: [
+      {
+        id: "light-blue",
+        name: "Celeste",
+        class: "bg-blue-400"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 15,
+    name: "Chompa de Lana Cuello Alto",
+    category: "Chompas",
+    price: 75,
+    rating: 4.7,
+    imageColor: "bg-orange-200",
+    colorText: "Beige",
+    description: "Chompa gruesa y muy cálida para invierno.",
+    features: [
+      "Cuello tortuga",
+      "Punto trenzado"
+    ],
+    colors: [
+      {
+        id: "beige",
+        name: "Beige",
+        class: "bg-orange-200"
+      },
+      {
+        id: "gray",
+        name: "Gris oscuro",
+        class: "bg-gray-600"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 16,
+    name: "Camisa de Lino Blanca",
+    category: "Camisas",
+    price: 59.99,
+    rating: 4.6,
+    imageColor: "bg-white border border-gray-300",
+    colorText: "Blanco",
+    description: "Camisa fresca y ligera, excelente para días calurosos.",
+    features: [
+      "100% Lino",
+      "Manga larga enrollable"
+    ],
+    colors: [
+      {
+        id: "white",
+        name: "Blanco",
+        class: "bg-white border border-gray-300"
+      },
+      {
+        id: "light-blue",
+        name: "Celeste",
+        class: "bg-blue-200"
+      }
+    ],
+    sizes: [
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      },
+      {
+        name: "XL",
+        available: false
+      }
+    ]
+  },
+  {
+    id: 17,
+    name: "Pantalón de Vestir Gris",
+    category: "Pantalones",
+    price: 69.99,
+    rating: 4.5,
+    imageColor: "bg-gray-500",
+    colorText: "Gris",
+    description: "Pantalón formal para oficina o eventos especiales.",
+    features: [
+      "Corte recto",
+      "Pliegue frontal",
+      "Bolsillos laterales"
+    ],
+    colors: [
+      {
+        id: "gray",
+        name: "Gris",
+        class: "bg-gray-500"
+      },
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 18,
+    name: "Casaca de Cuero Sintético",
+    category: "Casacas",
+    price: 99.99,
+    rating: 4.8,
+    imageColor: "bg-gray-900",
+    colorText: "Negro",
+    description: "Estilo rockero clásico con múltiples cierres.",
+    features: [
+      "Cuello con solapa",
+      "Cinturón ajustable"
+    ],
+    colors: [
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      },
+      {
+        id: "brown",
+        name: "Marrón",
+        class: "bg-yellow-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 19,
+    name: "Vestido de Noche Rojo",
+    category: "Vestidos",
+    price: 89.99,
+    rating: 4.9,
+    imageColor: "bg-red-600",
+    colorText: "Rojo",
+    description: "Vestido largo elegante para eventos de gala.",
+    features: [
+      "Escote en V",
+      "Abertura lateral"
+    ],
+    colors: [
+      {
+        id: "red",
+        name: "Rojo",
+        class: "bg-red-600"
+      },
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: false
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 20,
+    name: "Polera Estampada Vintage",
+    category: "Poleras",
+    price: 39.99,
+    rating: 4.3,
+    imageColor: "bg-yellow-100",
+    colorText: "Crema",
+    description: "Polera sin capucha con diseño gráfico retro.",
+    features: [
+      "Cuello redondo",
+      "Algodón suave"
+    ],
+    colors: [
+      {
+        id: "cream",
+        name: "Crema",
+        class: "bg-yellow-100"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 21,
+    name: "Falda Vaquera Midi",
+    category: "Faldas",
+    price: 45,
+    rating: 4.5,
+    imageColor: "bg-blue-500",
+    colorText: "Azul medio",
+    description: "Falda de jean clásica por debajo de la rodilla.",
+    features: [
+      "Abertura frontal",
+      "Bolsillos traseros"
+    ],
+    colors: [
+      {
+        id: "blue",
+        name: "Azul medio",
+        class: "bg-blue-500"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 22,
+    name: "Shorts Deportivos",
+    category: "Shorts",
+    price: 24.99,
+    rating: 4.7,
+    imageColor: "bg-gray-800",
+    colorText: "Gris oscuro",
+    description: "Ideales para correr o hacer ejercicio.",
+    features: [
+      "Secado rápido",
+      "Cintura elástica"
+    ],
+    colors: [
+      {
+        id: "dark-gray",
+        name: "Gris oscuro",
+        class: "bg-gray-800"
+      },
+      {
+        id: "black",
+        name: "Negro",
+        class: "bg-gray-900"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  },
+  {
+    id: 23,
+    name: "Chompa Ligera de Hilo",
+    category: "Chompas",
+    price: 49.99,
+    rating: 4.4,
+    imageColor: "bg-pink-300",
+    colorText: "Rosa pastel",
+    description: "Chompa de entretiempo muy combinable.",
+    features: [
+      "Cuello barco",
+      "Tejido fino"
+    ],
+    colors: [
+      {
+        id: "pink",
+        name: "Rosa pastel",
+        class: "bg-pink-300"
+      },
+      {
+        id: "white",
+        name: "Blanco",
+        class: "bg-white border border-gray-300"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: false
+      }
+    ]
+  },
+  {
+    id: 24,
+    name: "Polo a Rayas",
+    category: "Polos",
+    price: 19.99,
+    rating: 4.2,
+    imageColor: "bg-blue-200",
+    colorText: "Blanco y Azul",
+    description: "Polo de estilo marinero atemporal.",
+    features: [
+      "Manga corta",
+      "Corte relajado"
+    ],
+    colors: [
+      {
+        id: "striped",
+        name: "Blanco y Azul",
+        class: "bg-blue-200"
+      }
+    ],
+    sizes: [
+      {
+        name: "S",
+        available: true
+      },
+      {
+        name: "M",
+        available: true
+      },
+      {
+        name: "L",
+        available: true
+      }
+    ]
+  }
+
 ];
 
 // Mapear los sizes de objetos a un array simple de strings para compatibilidad con el formato existente en filtros

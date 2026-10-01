@@ -8,10 +8,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
             <Link to="/" className="text-2xl font-extrabold text-primary tracking-tight">
-              Style<span className="text-secondary">Accesible</span>
+              ParaTodos
             </Link>
             <p className="mt-4 text-textMuted leading-relaxed">
-              Moda para todos. Diseñamos experiencias de compra sin barreras, 
+              ParaTodos. Diseñamos experiencias de compra sin barreras, 
               con herramientas integradas para daltónicos y personas con dificultades visuales.
             </p>
           </div>
@@ -22,7 +22,7 @@ const Footer = () => {
               <li><Link to="#" className="text-textMuted hover:text-primary transition-colors focus:ring-2 focus:ring-primary rounded">Hombre</Link></li>
               <li><Link to="#" className="text-textMuted hover:text-primary transition-colors focus:ring-2 focus:ring-primary rounded">Mujer</Link></li>
               <li><Link to="#" className="text-textMuted hover:text-primary transition-colors focus:ring-2 focus:ring-primary rounded">Accesorios</Link></li>
-              <li><Link to="#" className="text-textMuted hover:text-primary transition-colors focus:ring-2 focus:ring-primary rounded">Novedades</Link></li>
+              <li><Link to="/about" className="text-textMuted hover:text-primary transition-colors focus:ring-2 focus:ring-primary rounded">Nosotros</Link></li>
             </ul>
           </div>
 
@@ -49,7 +49,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-border mt-12 pt-8 text-center text-textMuted text-sm">
-          <p>&copy; {new Date().getFullYear()} StyleAccesible. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} ParaTodos. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

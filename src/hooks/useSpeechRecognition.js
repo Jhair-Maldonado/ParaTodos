@@ -7,6 +7,16 @@ const useSpeechRecognition = () => {
   const [error, setError] = useState(null);
   const [recognitionInstance, setRecognitionInstance] = useState(null);
 
+  // Clears the error automatically after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {

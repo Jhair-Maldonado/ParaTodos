@@ -13,7 +13,7 @@ const GuidedTour = () => {
 
   const steps = [
     {
-      title: "Bienvenido a Para Todos",
+      title: "Bienvenido a ParaTodos",
       content: "Te mostraremos cómo encontrar y comprar una prenda fácilmente en nuestra tienda."
     },
     {

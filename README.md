@@ -1,6 +1,6 @@
-# Para Todos - Prototipo de Tienda de Ropa Inclusiva
+# ParaTodos - Prototipo de Tienda de Ropa Inclusiva
 
-"Para Todos" es un prototipo web de alta fidelidad desarrollado para el curso de Interacción Hombre-Máquina. Su objetivo principal es demostrar principios de usabilidad, accesibilidad, diseño centrado en el usuario, y reducción de carga cognitiva.
+"ParaTodos" es un prototipo web de alta fidelidad desarrollado para el curso de Interacción Hombre-Máquina. Su objetivo principal es demostrar principios de usabilidad, accesibilidad, diseño centrado en el usuario, y reducción de carga cognitiva.
 
 El proyecto está construido con:
 

@@ -71,7 +71,7 @@ const Header = () => {
             {isMobileMenuOpen ? <X className="w-6 h-6 text-text" /> : <Menu className="w-6 h-6 text-text" />}
           </button>
           <Link to="/" className="text-2xl font-extrabold text-primary tracking-tight">
-            Style<span className="text-secondary">Accesible</span>
+            ParaTodos
           </Link>
         </div>
         
