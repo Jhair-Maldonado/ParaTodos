@@ -3,10 +3,10 @@ import useAccessibilityStore from '../store/accessibilityStore';
 import { Link } from 'react-router-dom';
 
 const AboutPage = () => {
-  const { simplifiedMode, reducedMotion } = useAccessibilityStore();
+  const { simplifiedMode } = useAccessibilityStore();
 
   return (
-    <div className="animate-fade-in pb-20">
+    <div className="pb-20">
       {/* Sección 1 — Encabezado */}
       <section className="bg-surface border-b border-border py-12 md:py-20 relative isolate overflow-hidden">
         {!simplifiedMode && (
@@ -26,7 +26,7 @@ const AboutPage = () => {
       <section className="py-12 md:py-16 bg-background">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="bg-surface border border-border rounded-3xl p-8 md:p-12 shadow-sm text-center">
-            <Heart className={`w-12 h-12 text-error mx-auto mb-6 ${!reducedMotion ? 'animate-bounce' : ''}`} aria-hidden="true" />
+            <Heart className="w-12 h-12 text-error mx-auto mb-6" aria-hidden="true" />
             <h2 className="text-3xl font-extrabold text-text mb-4">Nuestro propósito</h2>
             <p className="text-lg text-textMuted leading-relaxed">
               ParaTodos busca reducir barreras presentes en tiendas online tradicionales, facilitando la identificación de productos, colores, tallas y acciones durante el proceso de compra.
@@ -52,7 +52,7 @@ const AboutPage = () => {
             <FeatureCard icon={Eye} title="Modos adaptados para daltonismo" desc="Filtros especializados." />
             <FeatureCard icon={Zap} title="Alto contraste" desc="Mejora la legibilidad." />
             <FeatureCard icon={Layout} title="Navegación simplificada" desc="Menos distracciones." />
-            <FeatureCard icon={Mic} title="Búsqueda por voz" desc="Encuentra usando tu voz." />
+            <FeatureCard icon={Mic} title="Búsqueda por voz" desc="Dilo en voz alta y escucha los resultados." />
           </div>
           
           {!simplifiedMode && (
@@ -99,7 +99,7 @@ const AboutPage = () => {
             Su objetivo es evaluar la usabilidad, accesibilidad, interacción y la experiencia del usuario. 
             <strong className="block mt-4 text-text">No es una tienda comercial real.</strong>
           </p>
-          <Link to="/catalog" className="inline-flex items-center gap-2 bg-primary hover:bg-primaryHover text-white px-8 py-3 rounded-xl font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50">
+          <Link to="/catalog" className="inline-flex items-center gap-2 bg-primary hover:bg-primaryHover text-onPrimary px-8 py-3 rounded-xl font-bold transition-colors">
             Explorar catálogo <ArrowRight className="w-5 h-5" />
           </Link>
         </div>

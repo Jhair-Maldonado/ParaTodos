@@ -7,12 +7,12 @@ const useSpeechRecognition = () => {
   const [error, setError] = useState(null);
   const [recognitionInstance, setRecognitionInstance] = useState(null);
 
-  // Clears the error automatically after 5 seconds
+  // El mensaje de error permanece 8 s (antes 2 s: muy poco para usuarios con baja visión o lector de pantalla)
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setError(null);
-      }, 2000);
+      }, 8000);
       return () => clearTimeout(timer);
     }
   }, [error]);

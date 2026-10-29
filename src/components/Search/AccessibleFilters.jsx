@@ -1,228 +1,99 @@
-import { useState, useEffect } from 'react';
-import { Filter, X, Tag, DollarSign, Star, Ruler, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Filter, X, Tag, DollarSign, Star, Ruler, Check, Palette, RotateCcw } from 'lucide-react';
+import useFocusTrap from '../../hooks/useFocusTrap';
+import useAccessibilityStore from '../../store/accessibilityStore';
 
-const FilterButton = ({ id, icon: Icon, label, value, activeModal, setActiveModal }) => (
-  <button
-    onClick={() => setActiveModal(id)}
-    className="flex items-center gap-2 bg-background border border-border px-5 py-3 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap font-bold focus:ring-4 focus:ring-primary/30"
-    aria-expanded={activeModal === id}
-    aria-haspopup="dialog"
-  >
-    <Icon className="w-5 h-5 text-textMuted" aria-hidden="true" />
-    <span className="text-textMuted font-medium">{label}:</span> 
-    <span className="text-text">{value}</span>
-  </button>
-);
+// Filtros configurados en un solo lugar (antes eran 4 bloques casi idénticos,
+// cada uno con un color de selección distinto: índigo, celeste, verde y amarillo).
+const AccessibleFilters = ({ filters, values, onChange, onReset, hasActive }) => {
+  const [activeId, setActiveId] = useState(null);
+  const { reducedMotion } = useAccessibilityStore();
+  const active = filters.find((f) => f.id === activeId);
+  const close = () => setActiveId(null);
+  const dialogRef = useFocusTrap(!!active, close);
 
-const AccessibleFilters = ({ 
-  currentCategory, setCurrentCategory, 
-  currentSize, setCurrentSize,
-  currentMaxPrice, setCurrentMaxPrice,
-  currentMinRating, setCurrentMinRating
-}) => {
-  const [activeModal, setActiveModal] = useState(null); // 'category' | 'size' | 'price' | 'rating' | null
-
-  const categories = ['Todos', 'Camisas', 'Pantalones', 'Accesorios', 'Abrigos'];
-  const sizes = ['Todas', 'S', 'M', 'L', 'XL'];
-  const priceOptions = [
-    { label: 'Cualquiera', value: 1000 },
-    { label: 'Hasta S/ 25', value: 25 },
-    { label: 'Hasta S/ 50', value: 50 },
-    { label: 'Hasta S/ 100', value: 100 },
-  ];
-  const ratingOptions = [
-    { label: 'Cualquiera', value: 0 },
-    { label: '4 Estrellas o más', value: 4 },
-    { label: '4.5 Estrellas o más', value: 4.5 },
-  ];
-
-  const closeModal = () => setActiveModal(null);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && activeModal) {
-        closeModal();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [activeModal]);
+  const icons = { color: Palette, category: Tag, size: Ruler, price: DollarSign, rating: Star };
 
   return (
     <div className="mb-8">
-      {/* Barra de herramientas de filtros */}
-      <section aria-label="Filtros de catálogo" className="flex flex-wrap items-center gap-4 bg-surface p-4 rounded-2xl shadow-sm border border-border">
-        <div className="flex items-center gap-2 text-text font-bold mr-2">
-          <Filter className="w-6 h-6 text-primary" aria-hidden="true" /> Filtros:
-        </div>
-        
-        <FilterButton 
-          id="category" 
-          icon={Tag} 
-          label="Categoría" 
-          value={currentCategory} 
-          activeModal={activeModal}
-          setActiveModal={setActiveModal}
-        />
-        <FilterButton 
-          id="size" 
-          icon={Ruler} 
-          label="Talla" 
-          value={currentSize} 
-          activeModal={activeModal}
-          setActiveModal={setActiveModal}
-        />
-        <FilterButton 
-          id="price" 
-          icon={DollarSign} 
-          label="Precio" 
-          value={currentMaxPrice === 1000 ? 'Todos' : `Hasta S/ ${currentMaxPrice}`} 
-          activeModal={activeModal}
-          setActiveModal={setActiveModal}
-        />
-        <FilterButton 
-          id="rating" 
-          icon={Star} 
-          label="Calificación" 
-          value={currentMinRating === 0 ? 'Todas' : `${currentMinRating}+`} 
-          activeModal={activeModal}
-          setActiveModal={setActiveModal}
-        />
+      <section aria-label="Filtros del catálogo" className="flex flex-wrap items-center gap-3 bg-surface p-4 rounded-2xl shadow-sm border border-border">
+        <p className="flex items-center gap-2 text-text font-bold mr-2">
+          <Filter className="w-6 h-6 text-primary" aria-hidden="true" /> Filtrar por:
+        </p>
+        {filters.map((f) => {
+          const Icon = icons[f.id];
+          const current = f.options.find((o) => o.value === values[f.id]);
+          const isSet = values[f.id] !== f.options[0].value;
+          return (
+            <button
+              key={f.id}
+              onClick={() => setActiveId(f.id)}
+              aria-haspopup="dialog"
+              aria-expanded={activeId === f.id}
+              className={`flex flex-wrap items-center gap-x-2 max-w-full text-left min-h-[48px] px-5 py-2 rounded-3xl border-2 font-bold transition-colors ${
+                isSet ? 'border-primary bg-primary/10 text-text' : 'border-borderStrong bg-background text-text hover:border-primary'
+              }`}
+            >
+              <Icon className="w-5 h-5" aria-hidden="true" />
+              <span className="font-medium">{f.label}:</span>
+              <span>{current?.short || current?.label}</span>
+            </button>
+          );
+        })}
+        {hasActive && (
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 min-h-[48px] px-4 rounded-full font-bold text-primary underline-offset-4 hover:underline"
+          >
+            <RotateCcw className="w-5 h-5" aria-hidden="true" /> Quitar todo
+          </button>
+        )}
       </section>
 
-      {/* MODAL GLOBAL */}
-      {activeModal && (
+      {active && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Fondo oscuro para "perder visión" del fondo y enfocar en el filtro */}
-          <div 
-            className="absolute inset-0 bg-black/70 backdrop-blur-md animate-fade-in"
-            aria-hidden="true"
-          ></div>
-          
-          {/* Contenedor del Modal */}
-          <div 
-            className="relative bg-surface w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 animate-slide-up border border-border"
+          <div className="absolute inset-0 bg-black/70" aria-hidden="true" onClick={close}></div>
+          <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Opciones de filtro"
+            aria-labelledby="filter-title"
+            className={`relative bg-surface w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-6 sm:p-8 border border-borderStrong ${!reducedMotion ? 'animate-slide-up' : ''}`}
           >
-            <button 
-              onClick={closeModal}
-              className="absolute top-4 right-4 p-2 bg-background rounded-full hover:bg-error hover:text-white transition-colors focus:ring-4 focus:ring-error/50"
-              aria-label="Cerrar modal de filtros"
-            >
-              <X className="w-6 h-6" aria-hidden="true" />
-            </button>
-            
-            {/* Contenido Dinámico del Modal */}
-            {activeModal === 'category' && (
-              <>
-                <h3 className="text-2xl font-extrabold mb-6 text-text flex items-center gap-3">
-                  <Tag className="text-primary w-8 h-8" aria-hidden="true" /> Seleccionar Categoría
-                </h3>
-                <div className="flex flex-col gap-3">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => { setCurrentCategory(cat); closeModal(); }}
-                      aria-pressed={currentCategory === cat}
-                      className={`px-6 py-4 rounded-xl font-bold text-xl text-left flex items-center justify-between transition-all focus:ring-4 focus:ring-primary/50 ${
-                        currentCategory === cat 
-                          ? 'bg-primary text-white shadow-lg' 
-                          : 'bg-background border border-border text-text hover:border-primary'
-                      }`}
-                    >
-                      {cat}
-                      {currentCategory === cat && <Check className="w-6 h-6" aria-hidden="true" />}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {activeModal === 'size' && (
-              <>
-                <h3 className="text-2xl font-extrabold mb-6 text-text flex items-center gap-3">
-                  <Ruler className="text-secondary w-8 h-8" aria-hidden="true" /> Seleccionar Talla
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => { setCurrentSize(size); closeModal(); }}
-                      aria-pressed={currentSize === size}
-                      className={`py-6 rounded-xl font-extrabold text-2xl flex items-center justify-center gap-2 transition-all focus:ring-4 focus:ring-secondary/50 ${
-                        currentSize === size 
-                          ? 'bg-secondary text-white shadow-lg' 
-                          : 'bg-background border border-border text-text hover:border-secondary'
-                      }`}
-                    >
-                      {currentSize === size && <Check className="w-6 h-6" aria-hidden="true" />}
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {activeModal === 'price' && (
-              <>
-                <h3 className="text-2xl font-extrabold mb-6 text-text flex items-center gap-3">
-                  <DollarSign className="text-green-600 w-8 h-8" aria-hidden="true" /> Rango de Precio
-                </h3>
-                <div className="flex flex-col gap-3">
-                  {priceOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => { setCurrentMaxPrice(opt.value); closeModal(); }}
-                      aria-pressed={currentMaxPrice === opt.value}
-                      className={`px-6 py-4 rounded-xl font-bold text-xl text-left flex items-center justify-between transition-all focus:ring-4 focus:ring-green-600/50 ${
-                        currentMaxPrice === opt.value 
-                          ? 'bg-green-600 text-white shadow-lg' 
-                          : 'bg-background border border-border text-text hover:border-green-600'
-                      }`}
-                    >
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <h3 id="filter-title" className="text-2xl font-extrabold text-text">{active.title}</h3>
+              <button
+                onClick={close}
+                className="p-3 bg-background border border-borderStrong rounded-full hover:bg-surfaceHover"
+                aria-label="Cerrar sin cambiar"
+              >
+                <X className="w-6 h-6" aria-hidden="true" />
+              </button>
+            </div>
+            {active.hint && <p className="text-textMuted mb-4">{active.hint}</p>}
+            <div className={active.grid ? 'grid grid-cols-2 gap-3' : 'flex flex-col gap-3'}>
+              {active.options.map((opt) => {
+                const selected = values[active.id] === opt.value;
+                return (
+                  <button
+                    key={String(opt.value)}
+                    data-autofocus={selected ? '' : undefined}
+                    onClick={() => { onChange(active.id, opt.value); close(); }}
+                    aria-pressed={selected}
+                    className={`min-h-[56px] px-5 py-3 rounded-xl font-bold text-lg text-left flex items-center justify-between gap-3 border-2 transition-colors ${
+                      selected ? 'bg-primary text-onPrimary border-primary' : 'bg-background border-borderStrong text-text hover:border-primary'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      {opt.swatch && <span className={`w-6 h-6 rounded-full border-2 border-borderStrong ${opt.swatch}`} aria-hidden="true"></span>}
                       {opt.label}
-                      {currentMaxPrice === opt.value && <Check className="w-6 h-6" aria-hidden="true" />}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {activeModal === 'rating' && (
-              <>
-                <h3 className="text-2xl font-extrabold mb-6 text-text flex items-center gap-3">
-                  <Star className="text-yellow-500 w-8 h-8 fill-yellow-500" aria-hidden="true" /> Calificación Mínima
-                </h3>
-                <div className="flex flex-col gap-3">
-                  {ratingOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => { setCurrentMinRating(opt.value); closeModal(); }}
-                      aria-pressed={currentMinRating === opt.value}
-                      className={`px-6 py-4 rounded-xl font-bold text-xl text-left flex items-center justify-between transition-all focus:ring-4 focus:ring-yellow-500/50 ${
-                        currentMinRating === opt.value 
-                          ? 'bg-yellow-500 text-white shadow-lg' 
-                          : 'bg-background border border-border text-text hover:border-yellow-500'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {opt.value > 0 ? (
-                          <>
-                            <Star className={`w-6 h-6 ${currentMinRating === opt.value ? 'fill-white text-white' : 'fill-yellow-500 text-yellow-500'}`} aria-hidden="true" />
-                            {opt.label}
-                          </>
-                        ) : (
-                          opt.label
-                        )}
-                      </span>
-                      {currentMinRating === opt.value && <Check className="w-6 h-6" aria-hidden="true" />}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+                      {opt.count !== undefined && <span className="font-medium text-base opacity-80">({opt.count})</span>}
+                    </span>
+                    {selected && <Check className="w-6 h-6 shrink-0" aria-hidden="true" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

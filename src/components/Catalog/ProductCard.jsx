@@ -1,76 +1,67 @@
-
-import { ShoppingCart, Eye, Star } from 'lucide-react';
+import { Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import useCartStore from '../../store/cartStore';
 
-const ProductCard = ({ product }) => {
-  const { addItem } = useCartStore();
-
-  const handleAddToCart = () => {
-    addItem(product);
-  };
+// Una sola acción por tarjeta: abrir el detalle para elegir color y talla.
+// Antes había dos botones ("carrito" y "Comprar") que agregaban la prenda sin talla.
+const ProductCard = ({ product, headingLevel = 3 }) => {
+  const Heading = `h${headingLevel}`;
+  const otherColors = (product.colors || []).filter((c) => c.name !== product.colorText).map((c) => c.name);
+  const available = (product.sizes || []).filter((s) => s.available !== false).map((s) => s.name);
+  const soldOut = (product.sizes || []).filter((s) => s.available === false).map((s) => s.name);
 
   return (
-    <article className="group bg-surface rounded-2xl shadow-premium overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 transform hover:-translate-y-1">
-      {/* Product Image Area */}
-      <div className={`relative h-64 ${product.imageColor} flex items-center justify-center p-6`}>
-        {/* Placeholder for actual image */}
-        <div className="w-full h-full bg-black/10 rounded-xl backdrop-blur-sm flex items-center justify-center border border-white/20 relative overflow-hidden">
-          {/* Elemento visual decorativo para el color del producto */}
-          <div aria-hidden="true" className="absolute inset-0 w-full h-full object-cover"></div>
-          <span className="text-white/80 font-bold text-lg drop-shadow-md" aria-hidden="true">Imagen de Prenda</span>
-        </div>
-        
-        {/* Hover Actions */}
-        <div className="absolute inset-0 bg-background/40 opacity-0 focus-within:opacity-100 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-sm">
-          <Link to={`/product/${product.id}`} className="p-3 bg-surface text-text rounded-full shadow-lg hover:bg-primary hover:text-white transition-colors focus:ring-4 focus:ring-primary/50 outline-none" aria-label={`Ver detalles de ${product.name}`}>
-            <Eye className="w-5 h-5" aria-hidden="true" />
-          </Link>
-          <button 
-            onClick={handleAddToCart}
-            className="p-3 bg-primary text-white rounded-full shadow-lg hover:bg-primaryHover transition-colors focus:ring-4 focus:ring-primary/50 outline-none" 
-            aria-label={`Agregar ${product.name} al carrito`}
-          >
-            <ShoppingCart className="w-5 h-5" aria-hidden="true" />
-          </button>
-        </div>
+    <article className="group relative w-full bg-surface rounded-2xl shadow-premium overflow-hidden border border-border hover:border-primary focus-within:border-primary transition-colors flex flex-col">
+      {/* Imagen de referencia (decorativa: la información de color está en texto) */}
+      <div className={`relative h-56 ${product.imageColor}`} aria-hidden="true">
+        <span className="absolute left-3 bottom-3 bg-surface text-text text-sm font-bold px-3 py-1.5 rounded-full shadow">
+          {product.colorText}
+        </span>
       </div>
-      
-      {/* Product Info */}
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-text mb-1 truncate">{product.name}</h3>
-        
-        {/* Descriptor Textual de Color, Tallas y Calificación */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
-          <div className="flex items-center gap-2">
-            <span className={`w-4 h-4 rounded-full border border-border shadow-sm ${product.imageColor}`} aria-hidden="true"></span>
-            <p className="text-textMuted font-medium text-sm">{product.colorText}</p>
-          </div>
-          
-          {product.sizes && product.sizes.length > 0 && (
-            <div className="flex items-center gap-1 text-sm font-medium text-textMuted">
-              <span className="sr-only">Tallas disponibles:</span>
-              <span aria-hidden="true">Tallas: {product.sizes.join(', ')}</span>
-            </div>
-          )}
 
-          {product.rating && (
-            <div className="flex items-center gap-1 text-sm font-bold text-text" aria-label={`Calificación: ${product.rating} estrellas`}>
-              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" aria-hidden="true" />
-              <span aria-hidden="true">{product.rating}</span>
+      <div className="p-5 flex flex-col flex-1">
+        <Heading className="text-xl font-bold text-text mb-2">
+          <Link
+            to={`/product/${product.id}`}
+            className="after:absolute after:inset-0"
+          >
+            {product.name}
+          </Link>
+        </Heading>
+
+        <dl className="text-sm text-textMuted space-y-1 mb-4">
+          <div className="flex items-center gap-2">
+            <dt className="sr-only">Color principal</dt>
+            <span className={`w-4 h-4 rounded-full border border-borderStrong ${product.imageColor}`} aria-hidden="true"></span>
+            <dd className="font-semibold text-text">{product.colorText}</dd>
+          </div>
+          {otherColors.length > 0 && (
+            <div className="flex gap-1">
+              <dt>También en:</dt>
+              <dd>{otherColors.join(', ')}</dd>
             </div>
           )}
-        </div>
-        
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
-          <span className="text-2xl font-extrabold text-text" aria-label={`Precio: S/ ${product.price.toFixed(2)}`}>S/ {product.price.toFixed(2)}</span>
-          <button 
-            onClick={handleAddToCart}
-            className="text-primary font-bold hover:underline focus:ring-2 focus:ring-primary outline-none rounded px-1" 
-            aria-label={`Comprar ${product.name} por S/ ${product.price.toFixed(2)}`}
-          >
-            Comprar
-          </button>
+          {available.length > 0 && (
+            <div className="flex gap-1">
+              <dt>Tallas:</dt>
+              <dd>{available.join(', ')}{soldOut.length > 0 && <> · <span className="line-through">{soldOut.join(', ')}</span> agotada{soldOut.length > 1 ? 's' : ''}</>}</dd>
+            </div>
+          )}
+          {product.rating && (
+            <div className="flex items-center gap-1">
+              <dt className="sr-only">Calificación</dt>
+              <Star className="w-4 h-4 fill-current text-text" aria-hidden="true" />
+              <dd className="font-semibold text-text">{product.rating} <span className="sr-only">de 5 estrellas</span></dd>
+            </div>
+          )}
+        </dl>
+
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-border">
+          <p className="text-2xl font-extrabold text-text">
+            <span className="sr-only">Precio: </span>S/ {product.price.toFixed(2)}
+          </p>
+          <span className="inline-flex items-center gap-1 text-primary font-bold group-hover:underline" aria-hidden="true">
+            Elegir talla <ArrowRight className="w-4 h-4" />
+          </span>
         </div>
       </div>
     </article>

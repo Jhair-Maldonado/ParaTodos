@@ -7,19 +7,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="description" content="Tienda de ropa accesible con descripciones de color por nombre, alto contraste y asistencia guiada." />
     <title>ParaTodos</title>
   </head>
   <body>
-    <!-- SVG Filters for Color Blindness Correction (Daltonization approximation) -->
+    <!-- Filtros de corrección para daltonismo.
+         Protanopia y tritanopia: daltonización (Fidaner) sobre la simulación de Machado et al. (2009).
+         Deuteranopia se conserva porque ya aumentaba la diferencia rojo/verde percibida. -->
     <svg width="0" height="0" style="position: absolute; pointer-events: none; z-index: -1;" aria-hidden="true">
       <defs>
         <!-- Protanopia Filter -->
         <filter id="protanopia-filter">
           <feColorMatrix type="matrix" values="
-            0.622, 0.377, 0, 0, 0
-            0.264, 0.732, 0, 0, 0
-            0.216, 0.110, 0.673, 0, 0
-            0, 0, 0, 1, 0" />
+            1.000, 0.000, 0.000, 0, 0
+            0.479, 0.477, 0.044, 0, 0
+            0.597, -0.689, 1.091, 0, 0
+            0, 0, 0, 1, 0" color-interpolation-filters="linearRGB" />
         </filter>
         <!-- Deuteranopia Filter -->
         <filter id="deuteranopia-filter">
@@ -32,10 +35,10 @@
         <!-- Tritanopia Filter -->
         <filter id="tritanopia-filter">
           <feColorMatrix type="matrix" values="
-            1.000, 0.057, -0.057, 0, 0
-            0, 0.936, 0.064, 0, 0
-            0, 0.525, 0.474, 0, 0
-            0, 0, 0, 1, 0" />
+            0.741, -0.407, 0.666, 0, 0
+            0.075, 0.585, 0.340, 0, 0
+            0.000, 0.000, 1.000, 0, 0
+            0, 0, 0, 1, 0" color-interpolation-filters="linearRGB" />
         </filter>
       </defs>
     </svg>
