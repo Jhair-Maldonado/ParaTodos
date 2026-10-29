@@ -4,35 +4,48 @@
 
 @layer base {
   :root {
-    /* Vibrant Accessible Colors */
-    --color-primary: #4f46e5; /* Indigo 600 */
-    --color-primary-hover: #4338ca; /* Indigo 700 */
-    --color-secondary: #0ea5e9; /* Sky 500 */
-    --color-background: #f8fafc; /* Slate 50 */
-    --color-surface: #ffffff; 
+    /* Paleta verificada con WCAG 2.1 (texto >= 4.5:1, componentes >= 3:1) */
+    --color-primary: #4f46e5;        /* 6.29:1 con texto blanco */
+    --color-primary-hover: #4338ca;
+    --color-on-primary: #ffffff;     /* texto/íconos sobre botones de color */
+    --color-secondary: #0369a1;      /* antes #0ea5e9 (2.77:1) -> 5.93:1 */
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
     --color-surface-hover: #f1f5f9;
-    --color-text: #0f172a; /* Slate 900 */
-    --color-text-muted: #475569; /* Slate 600 */
-    --color-border: #e2e8f0; /* Slate 200 */
-    --color-error: #ef4444; /* Red 500 */
+    --color-text: #0f172a;
+    --color-text-muted: #475569;     /* 7.24:1 */
+    --color-border: #cbd5e1;         /* separadores decorativos */
+    --color-border-strong: #64748b;  /* bordes de controles: 4.76:1 (antes 1.18:1) */
+    --color-error: #b91c1c;          /* antes #ef4444 (3.76:1) -> 6.47:1 */
+    --color-success: #15803d;        /* 5.02:1 */
   }
 
   /* High Contrast Mode Variables */
   .dark {
-    --color-primary: #818cf8; /* Indigo 400 */
-    --color-primary-hover: #a5b4fc; /* Indigo 300 */
-    --color-secondary: #38bdf8; /* Sky 400 */
-    --color-background: #020617; /* Slate 950 */
-    --color-surface: #0f172a; /* Slate 900 */
+    /* Alto contraste real: fondo negro, texto blanco y botones claros con texto negro */
+    --color-primary: #a5b4fc;        /* como texto sobre negro: 10.7:1 */
+    --color-primary-hover: #c7d2fe;
+    --color-on-primary: #000000;     /* antes blanco sobre #818cf8 (2.98:1) */
+    --color-secondary: #7dd3fc;
+    --color-background: #000000;
+    --color-surface: #0b0f19;
     --color-surface-hover: #1e293b;
-    --color-text: #f8fafc; /* Slate 50 */
-    --color-text-muted: #cbd5e1; /* Slate 300 */
-    --color-border: #334155; /* Slate 700 */
-    --color-error: #f87171; /* Red 400 */
+    --color-text: #ffffff;
+    --color-text-muted: #e2e8f0;
+    --color-border: #475569;
+    --color-border-strong: #cbd5e1;  /* antes 1.72:1 */
+    --color-error: #fca5a5;
+    --color-success: #86efac;
+  }
+
+  /* Foco siempre visible y de alto contraste para navegación por teclado */
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
   }
 
   body {
-    @apply bg-background text-text transition-colors duration-300 antialiased selection:bg-primary selection:text-white;
+    @apply bg-background text-text transition-colors duration-300 antialiased selection:bg-primary selection:text-onPrimary;
   }
 }
 
@@ -69,3 +82,22 @@
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+/* Enlace para saltar al contenido principal (visible al recibir foco) */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 700;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* El contenedor principal recibe foco al cambiar de página; no necesita contorno */
+#contenido:focus { outline: none; }

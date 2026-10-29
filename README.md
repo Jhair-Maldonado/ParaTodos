@@ -64,6 +64,30 @@ Inicio → Catálogo → Seleccionar Variante Múltiple → Producto → talla/c
 - **Consola:** Silenciosa, sin errores lógicos ni loops de renderizado.
 - **Responsive:** Probado exitosamente en resoluciones móviles, sin botones o áreas táctiles superpuestas.
 
+## Avance 3 — Evaluación y accesibilidad
+
+Rama `avance3-evaluacion-accesibilidad`. Resultado medido con axe-core 4 (WCAG 2.0/2.1/2.2 A-AA + buenas prácticas) en 6 pantallas × 2 modos (normal y alto contraste): **145 incidencias → 0**.
+
+### Cambios principales
+
+| Área | Antes | Después |
+| --- | --- | --- |
+| Filtro por color | No existía (solo categoría, talla, precio y calificación) | Filtro por **nombre** de color (Negro, Azul, Rojo…), incluye todas las variantes de cada prenda |
+| Categorías | Lista fija de 4: Poleras, Vestidos, Casacas, Polos, Faldas, Shorts y Chompas no se podían filtrar | Se generan desde los datos (11 categorías) |
+| Búsqueda | Sensible a tildes, una sola frase exacta, solo el color principal («negro» encontraba 2 de 10 prendas) | Sin tildes, por palabras, en todos los colores («negro»: 10; «camisa azul»: 1) y con número de resultados anunciado |
+| Búsqueda por voz | Navegaba sin confirmar y solo daba respuesta visual | Muestra «Escuché: …», es editable y **lee en voz alta** cuántas prendas encontró |
+| Tarjeta de producto | Botones «carrito» y «Comprar» agregaban la prenda **sin talla** («Talla Única») | Una sola acción: abrir el detalle y elegir talla |
+| Tallas agotadas | Solo opacidad (en alto contraste se veían más destacadas) | Tachadas, borde discontinuo y la palabra «Agotada» |
+| Tamaño de texto | 90 % / 100 % / 115 %; además tres pantallas **reducían** el texto al agrandarlo | 100 % / 125 % / 150 % / 175 %, sin desborde horizontal |
+| Alto contraste | Botones con 2.98:1 (empeoraba el contraste) | Fondo negro, texto blanco, botones claros con texto negro |
+| Daltonismo | El filtro de protanopia reducía 55–69 % la diferencia rojo/verde | Matrices de corrección (daltonización); deuteranopia se mantiene |
+| Colores | Error 3.76:1, guía 2.77:1, bordes de campos 1.18:1; clases `bg-*/10` no se generaban | Paleta verificada ≥ 4.5:1 en texto y ≥ 3:1 en controles |
+| Teclado | El menú quedaba al final del orden de tabulación; diálogos sin trampa de foco | «Saltar al contenido», menú primero, foco atrapado y restaurado en diálogos |
+| Navegación | Título de pestaña fijo; sin aviso de cambio de página | Título por página, scroll al inicio y foco al contenido |
+| Ayuda | Botones flotantes solo con ícono; la guía rebotaba sin parar y tapaba contenido | Botones con texto «Accesibilidad» y «Guía», guía en la primera visita y con lectura en voz alta |
+| Formularios | Errores sin anunciar, sin `autocomplete` | Errores anunciados y enlazados al campo, `autocomplete`, mostrar contraseña |
+| Código | Duplicados (dos buscadores, dos formularios de auth, cuatro modales de filtro, dos formatos de datos de producto), archivos de plantilla sin uso | Componentes únicos (`SearchForm`, `AuthForm`, filtros por configuración), `useFocusTrap`, utilidades `speech`, `search` y `colors` |
+
 ---
 
 _Nota: Funcionalidades como el SpeechRecognition y el procesamiento final de pago son mocks de UI desarrollados expresamente para fines académicos en demostración de Interacción Hombre-Máquina._

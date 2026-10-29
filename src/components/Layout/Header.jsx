@@ -1,179 +1,169 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Search, Menu, User, LogOut, X, Mic } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Search, Menu, User, LogOut, X, Mic, MicOff } from 'lucide-react';
+import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import useCartStore from '../../store/cartStore';
 import useAuthStore from '../../store/authStore';
 import useAccessibilityStore from '../../store/accessibilityStore';
 import useSpeechRecognition from '../../hooks/useSpeechRecognition';
+import { speak } from '../../utils/speech';
+
+// Buscador único (antes había dos copias casi idénticas: escritorio y móvil)
+const SearchForm = ({ id, compact, onDone }) => {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const [term, setTerm] = useState(params.get('search') || '');
+  const [heard, setHeard] = useState('');
+  const { reducedMotion } = useAccessibilityStore();
+  const { isSupported, isListening, transcript, error, startListening, stopListening, clearTranscript } = useSpeechRecognition();
+
+  // Cuando llega lo reconocido por voz: se muestra en el campo, se informa y se busca
+  useEffect(() => {
+    if (!transcript) return;
+    const text = transcript.trim();
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setTerm(text);
+    setHeard(text);
+    /* eslint-enable react-hooks/set-state-in-effect */
+    clearTranscript();
+    navigate(`/catalog?search=${encodeURIComponent(text)}&voz=1`);
+    onDone?.();
+  }, [transcript, navigate, clearTranscript, onDone]);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!term.trim()) return;
+    setHeard('');
+    navigate(`/catalog?search=${encodeURIComponent(term.trim())}`);
+    onDone?.();
+  };
+
+  const toggleVoice = () => {
+    if (isListening) { stopListening(); return; }
+    speak('Te escucho. Di qué prenda buscas.');
+    setTimeout(startListening, 900);
+  };
+
+  return (
+    <div className="relative w-full">
+      <form onSubmit={submit} role="search" className="flex flex-wrap items-center gap-2">
+        <label htmlFor={id} className="sr-only">Buscar prendas o colores</label>
+        <div className="relative flex-1 min-w-[12rem]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-textMuted pointer-events-none" aria-hidden="true" />
+          <input
+            id={id}
+            type="search"
+            value={term}
+            onChange={(e) => { setTerm(e.target.value); setHeard(''); }}
+            placeholder="Ej.: camisa azul"
+            enterKeyHint="search"
+            className={`w-full pl-10 pr-3 bg-background border-2 border-borderStrong rounded-full text-text placeholder:text-textMuted ${compact ? 'py-3' : 'py-2 lg:w-64'}`}
+          />
+        </div>
+        <button type="submit" className="min-h-[44px] px-4 rounded-full bg-primary text-onPrimary font-bold hover:bg-primaryHover">
+          Buscar
+        </button>
+        {isSupported && (
+          <button
+            type="button"
+            onClick={toggleVoice}
+            aria-pressed={isListening}
+            aria-label={isListening ? 'Detener búsqueda por voz' : 'Buscar por voz'}
+            className={`min-h-[44px] min-w-[44px] flex items-center justify-center gap-2 px-3 rounded-full border-2 font-bold transition-colors ${
+              isListening ? 'border-error text-error bg-error/10' : 'border-borderStrong text-text hover:border-primary'
+            }`}
+          >
+            {isListening
+              ? <MicOff className={`w-5 h-5 ${!reducedMotion ? 'animate-pulse' : ''}`} aria-hidden="true" />
+              : <Mic className="w-5 h-5" aria-hidden="true" />}
+            <span className="hidden xl:inline text-sm">{isListening ? 'Detener' : 'Voz'}</span>
+          </button>
+        )}
+      </form>
+      <div aria-live="assertive" className="absolute top-full left-0 right-0 mt-2 z-10">
+        {isListening && <p className="text-sm font-bold text-text bg-surface border-2 border-primary p-2 rounded-lg">Escuchando… di, por ejemplo, «polo negro».</p>}
+        {error && <p role="alert" className="text-sm font-bold text-error bg-surface border-2 border-error p-2 rounded-lg">{error}</p>}
+        {heard && !isListening && !error && (
+          <p className="text-sm font-bold text-text bg-surface border-2 border-borderStrong p-2 rounded-lg">
+            Escuché: «{heard}». Si no es correcto, corrígelo en el campo.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const navClass = ({ isActive }) =>
+  `px-1 py-2 border-b-4 font-semibold transition-colors ${isActive ? 'border-primary text-text' : 'border-transparent text-text hover:border-borderStrong'}`;
 
 const Header = () => {
   const { items, openDrawer } = useCartStore();
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { reducedMotion, simplifiedMode } = useAccessibilityStore();
+  const { simplifiedMode, fontScale } = useAccessibilityStore();
+  // Con texto grande se usa siempre el encabezado compacto para evitar desbordes (WCAG 1.4.10)
+  const compact = fontScale >= 1.25;
+  const wide = compact ? 'hidden' : 'hidden lg:flex';
+  const narrow = compact ? '' : 'lg:hidden';
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
-  const navigate = useNavigate();
-  
-  const [searchTerm, setSearchTerm] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  
-  // Voice Search Hook
-  const {
-    isListening,
-    transcript,
-    error,
-    startListening,
-    stopListening,
-    clearTranscript
-  } = useSpeechRecognition();
-
-  // If voice transcript arrives, execute search automatically
-  useEffect(() => {
-    if (transcript) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSearchTerm(transcript);
-      navigate(`/catalog?search=${encodeURIComponent(transcript.trim())}`);
-      clearTranscript();
-      setIsMobileSearchOpen(false);
-      setIsMobileMenuOpen(false);
-    }
-  }, [transcript, navigate, clearTranscript]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/catalog?search=${encodeURIComponent(searchTerm.trim())}`);
-      setSearchTerm('');
-      setIsMobileSearchOpen(false);
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  const toggleVoiceSearch = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  };
+  const closeMobileSearch = () => setIsMobileSearchOpen(false);
 
   return (
-    // Cambiado de sticky a absolute para que el contenedor fijo en MainLayout controle su posición
-    <header className="absolute top-0 left-0 z-40 w-full bg-surface border-b border-border shadow-sm">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button 
-            className="p-2 -ml-2 rounded-lg hover:bg-surfaceHover lg:hidden" 
+    <header className="sticky top-0 z-40 w-full bg-surface border-b-2 border-border shadow-sm">
+      <div className="container mx-auto px-4 min-h-[5rem] py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex items-center gap-2">
+          <button
+            className={`p-3 -ml-3 rounded-lg hover:bg-surfaceHover ${narrow}`}
             aria-label="Menú principal"
-            onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setIsMobileSearchOpen(false); }}
             aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-nav"
+            onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setIsMobileSearchOpen(false); }}
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6 text-text" /> : <Menu className="w-6 h-6 text-text" />}
+            {isMobileMenuOpen ? <X className="w-6 h-6 text-text" aria-hidden="true" /> : <Menu className="w-6 h-6 text-text" aria-hidden="true" />}
           </button>
-          <Link to="/" className="text-2xl font-extrabold text-primary tracking-tight">
-            ParaTodos
-          </Link>
+          <Link to="/" className="text-2xl font-extrabold text-primary tracking-tight">ParaTodos</Link>
         </div>
-        
-        <nav className="hidden lg:flex items-center gap-8 font-medium">
-          <Link to="/" className="text-text hover:text-primary transition-colors">Inicio</Link>
-          <Link to="/catalog" className="text-text hover:text-primary transition-colors">Catálogo</Link>
-          {!simplifiedMode && (
-            <Link to="/about" className="text-text hover:text-primary transition-colors">Nosotros</Link>
-          )}
+
+        <nav aria-label="Principal" className={`${wide} items-center gap-6`}>
+          <NavLink to="/" end className={navClass}>Inicio</NavLink>
+          <NavLink to="/catalog" className={navClass}>Catálogo</NavLink>
+          {!simplifiedMode && <NavLink to="/about" className={navClass}>Nosotros</NavLink>}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Desktop Search */}
-          <div className="hidden lg:flex flex-col relative group">
-            <div className="flex items-center gap-2">
-              <form onSubmit={handleSearch} className="relative flex items-center">
-                <label htmlFor="desktop-search" className="sr-only">Buscar ropa</label>
-                <button type="submit" aria-label="Buscar" className="absolute left-3 text-textMuted hover:text-primary transition-colors">
-                  <Search className="w-5 h-5" aria-hidden="true" />
-                </button>
-                <input 
-                  id="desktop-search"
-                  type="text" 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar ropa..." 
-                  className="pl-10 pr-4 py-2 w-64 bg-background border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                />
-              </form>
-              <button
-                type="button"
-                onClick={toggleVoiceSearch}
-                aria-pressed={isListening}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-all focus:outline-none focus:ring-2 focus:ring-primary ${
-                  isListening 
-                    ? 'border-error text-error bg-error/10' 
-                    : 'border-border text-textMuted hover:text-primary hover:border-primary'
-                }`}
-              >
-                {isListening ? (
-                  <Mic className={`w-4 h-4 ${!reducedMotion ? 'animate-pulse' : ''}`} aria-hidden="true" />
-                ) : (
-                  <Mic className="w-4 h-4" aria-hidden="true" />
-                )}
-                <span className="text-sm font-medium">{isListening ? 'Escuchando...' : 'Buscar por voz'}</span>
-              </button>
-            </div>
-            {/* Voice Search Feedback / Error Messages */}
-            {error && (
-              <div className="absolute top-full mt-2 w-full text-center text-sm font-medium text-error bg-error/10 p-2 rounded border border-error/20" role="alert" aria-live="assertive">
-                {error}
-              </div>
-            )}
-            {transcript && !error && !isListening && (
-              <div className="absolute top-full mt-2 w-full text-center text-sm font-medium text-primary bg-primary/10 p-2 rounded border border-primary/20" role="status" aria-live="polite">
-                Buscando: "{transcript}"
-              </div>
-            )}
-          </div>
-          
-          {/* Mobile Search Toggle */}
-          <button 
-            className="p-2 lg:hidden rounded-full hover:bg-surfaceHover focus:outline-none focus:ring-2 focus:ring-primary" 
+        <div className="flex flex-wrap items-center gap-1 sm:gap-3">
+          {!compact && <div className="hidden lg:block"><SearchForm id="desktop-search" /></div>}
+
+          <button
+            className={`p-3 rounded-full hover:bg-surfaceHover ${narrow}`}
             aria-label="Buscar"
             aria-expanded={isMobileSearchOpen}
             onClick={() => { setIsMobileSearchOpen(!isMobileSearchOpen); setIsMobileMenuOpen(false); }}
           >
-            <Search className="w-6 h-6 text-text" />
+            <Search className="w-6 h-6 text-text" aria-hidden="true" />
           </button>
-          
-          
-          {!simplifiedMode && (
-            isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden md:inline font-bold text-primary mr-2">Hola, {user.name}</span>
-                <button 
-                  onClick={logout}
-                  className="p-2 rounded-full hover:bg-surfaceHover transition-colors group focus:outline-none focus:ring-2 focus:ring-primary" 
-                  aria-label="Cerrar sesión"
-                >
-                  <LogOut className="w-6 h-6 text-text group-hover:text-error" />
-                </button>
-              </div>
-            ) : (
-              <Link 
-                to="/login"
-                className="p-2 rounded-full hover:bg-surfaceHover transition-colors group focus:outline-none focus:ring-2 focus:ring-primary" 
-                aria-label="Iniciar sesión"
-              >
-                <User className="w-6 h-6 text-text group-hover:text-primary" />
-              </Link>
-            )
+
+          {/* La cuenta se mantiene visible también en navegación simplificada */}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-1">
+              <span className="hidden md:inline font-bold text-text">Hola, {user.name}</span>
+              <button onClick={logout} className="p-3 rounded-full hover:bg-surfaceHover" aria-label="Cerrar sesión">
+                <LogOut className="w-6 h-6 text-text" aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="p-3 rounded-full hover:bg-surfaceHover flex items-center gap-2" aria-label="Iniciar sesión">
+              <User className="w-6 h-6 text-text" aria-hidden="true" />
+            </Link>
           )}
 
-          <button 
+          <button
             onClick={openDrawer}
-            className="p-2 relative rounded-full hover:bg-surfaceHover transition-colors group focus:outline-none focus:ring-2 focus:ring-primary" 
-            aria-label="Carrito de compras"
+            className="p-3 relative rounded-full hover:bg-surfaceHover"
+            aria-label={`Carrito, ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'}`}
           >
-            <ShoppingCart className="w-6 h-6 text-text group-hover:text-primary" />
+            <ShoppingCart className="w-6 h-6 text-text" aria-hidden="true" />
             {totalItems > 0 && (
-              <span className="absolute top-0 right-0 w-5 h-5 bg-error text-white text-xs font-bold rounded-full flex items-center justify-center transform translate-x-1 -translate-y-1 animate-fade-in">
+              <span className="absolute top-0.5 right-0.5 min-w-[22px] h-[22px] px-1 bg-error text-onPrimary text-sm font-bold rounded-full flex items-center justify-center" aria-hidden="true">
                 {totalItems}
               </span>
             )}
@@ -181,94 +171,21 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Search Bar Dropdown */}
       {isMobileSearchOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-surface border-b border-border p-4 shadow-md animate-fade-in">
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <form onSubmit={handleSearch} className="relative flex-1 flex items-center">
-                <label htmlFor="mobile-search" className="sr-only">Buscar prendas, colores</label>
-                <button type="submit" aria-label="Buscar" className="absolute left-3 text-textMuted hover:text-primary z-10 focus:outline-none">
-                  <Search className="w-5 h-5" aria-hidden="true" />
-                </button>
-                <input 
-                  id="mobile-search"
-                  type="text" 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar prendas..." 
-                  className="pl-10 pr-4 py-3 w-full bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  autoFocus
-                />
-              </form>
-              <button
-                type="button"
-                onClick={toggleVoiceSearch}
-                aria-pressed={isListening}
-                aria-label="Buscar por voz"
-                className={`flex items-center justify-center p-3 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-primary ${
-                  isListening 
-                    ? 'border-error text-error bg-error/10' 
-                    : 'border-border text-textMuted bg-background hover:text-primary hover:border-primary'
-                }`}
-              >
-                {isListening ? (
-                  <Mic className={`w-5 h-5 ${!reducedMotion ? 'animate-pulse' : ''}`} aria-hidden="true" />
-                ) : (
-                  <Mic className="w-5 h-5" aria-hidden="true" />
-                )}
-              </button>
-            </div>
-            
-            {/* Mobile Feedback */}
-            {isListening && (
-               <div className="text-center text-sm font-medium text-error py-1" role="status" aria-live="polite">
-                 Escuchando...
-               </div>
-            )}
-            {error && (
-              <div className="text-center text-sm font-medium text-error bg-error/10 p-2 rounded border border-error/20" role="alert" aria-live="assertive">
-                {error}
-              </div>
-            )}
-            {transcript && !error && !isListening && (
-              <div className="text-center text-sm font-medium text-primary bg-primary/10 p-2 rounded border border-primary/20" role="status" aria-live="polite">
-                Buscando: "{transcript}"
-              </div>
-            )}
-          </div>
+        <div className={`${narrow} absolute top-full left-0 w-full bg-surface border-b-2 border-border p-4 pb-24 shadow-md`}>
+          <SearchForm id="mobile-search" compact onDone={closeMobileSearch} />
         </div>
       )}
 
-      {/* Mobile Navigation Dropdown */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-surface border-b border-border shadow-md animate-fade-in">
-          <nav className="flex flex-col p-4">
-            <Link 
-              to="/" 
-              className="p-4 border-b border-border text-lg font-medium hover:bg-surfaceHover hover:text-primary rounded-t-lg transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Inicio
-            </Link>
-            <Link 
-              to="/catalog" 
-              className={`p-4 border-b border-border text-lg font-medium hover:bg-surfaceHover hover:text-primary transition-colors ${simplifiedMode ? 'rounded-b-lg border-b-0' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Catálogo
-            </Link>
-            {!simplifiedMode && (
-              <Link 
-                to="/about" 
-                className="p-4 text-lg font-medium hover:bg-surfaceHover hover:text-primary rounded-b-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Nosotros
-              </Link>
-            )}
-          </nav>
-        </div>
+        <nav id="mobile-nav" aria-label="Principal" className={`${narrow} absolute top-full left-0 w-full bg-surface border-b-2 border-border shadow-md flex flex-col p-4`}>
+          {[['/', 'Inicio'], ['/catalog', 'Catálogo'], ...(!simplifiedMode ? [['/about', 'Nosotros']] : [])].map(([to, label]) => (
+            <NavLink key={to} to={to} end={to === '/'} onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) => `p-4 text-lg font-semibold rounded-lg ${isActive ? 'bg-primary/10 text-text border-l-4 border-primary' : 'text-text hover:bg-surfaceHover'}`}>
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       )}
     </header>
   );

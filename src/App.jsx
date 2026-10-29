@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import MainLayout from './components/Layout/MainLayout';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
@@ -23,7 +23,9 @@ function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="*" element={
             <div className="container mx-auto px-4 py-24 text-center">
-              <h2 className="text-4xl font-bold mb-4">Página no encontrada</h2>
+              <h1 className="text-4xl font-bold mb-4">Página no encontrada</h1>
+              <p className="text-lg text-textMuted mb-8">La dirección no existe o cambió.</p>
+              <Link to="/" className="inline-block bg-primary text-onPrimary px-8 py-4 rounded-xl font-bold">Volver al inicio</Link>
             </div>
           } />
         </Route>

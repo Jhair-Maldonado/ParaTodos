@@ -827,9 +827,3 @@ export const allProducts = [
 ];
 
 // Mapear los sizes de objetos a un array simple de strings para compatibilidad con el formato existente en filtros
-export const getLegacyProducts = () => {
-  return allProducts.map(p => ({
-    ...p,
-    sizes: p.sizes.map(s => s.name)
-  }));
-};

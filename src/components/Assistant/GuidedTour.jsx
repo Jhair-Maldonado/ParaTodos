@@ -1,193 +1,102 @@
-import { useState, useRef, useEffect } from 'react';
-import { Bot, X, ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { HelpCircle, X, ArrowRight, ArrowLeft, Check, Volume2 } from 'lucide-react';
 import useAccessibilityStore from '../../store/accessibilityStore';
+import useFocusTrap from '../../hooks/useFocusTrap';
+import { canSpeak, speak, stopSpeaking } from '../../utils/speech';
+
+const STEPS = [
+  { title: 'Bienvenido a ParaTodos', content: 'Te mostramos en 6 pasos cómo encontrar y comprar una prenda. Puedes salir cuando quieras con «Saltar» o la tecla Escape.' },
+  { title: 'Buscar', content: 'Arriba está el buscador. Escribe, por ejemplo, «polo negro», o toca el micrófono y dilo en voz alta. Siempre verás qué entendimos y cuántas prendas encontramos.' },
+  { title: 'Accesibilidad', content: 'Abajo a la izquierda está el botón «Accesibilidad». Ahí puedes agrandar el texto hasta 175 %, activar alto contraste, ajustar los colores para daltonismo o pedir que leamos en voz alta.' },
+  { title: 'Filtrar por color', content: 'En el catálogo puedes filtrar por color usando su nombre (Negro, Azul, Rojo…). Cada prenda muestra su color escrito, no solo la imagen.' },
+  { title: 'Elegir color y talla', content: 'Abre una prenda, elige color y talla. Las tallas agotadas aparecen tachadas con la palabra «Agotada». No podrás agregar al carrito sin elegir talla.' },
+  { title: 'Carrito y pago', content: 'El carrito está arriba a la derecha. Puedes cambiar cantidades, eliminar o deshacer. El pago tiene 3 pasos: entrega, pago y revisión.' },
+];
+const SEEN_KEY = 'paratodos-guia-vista';
 
 const GuidedTour = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const { reducedMotion, fontScale } = useAccessibilityStore();
-  
-  const cardRef = useRef(null);
-  const openButtonRef = useRef(null);
-  const nextButtonRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(() => {
+    try { return !localStorage.getItem(SEEN_KEY); } catch { return false; }
+  });
+  const [step, setStep] = useState(0);
+  const { reducedMotion, voiceFeedback } = useAccessibilityStore();
 
-  const steps = [
-    {
-      title: "Bienvenido a ParaTodos",
-      content: "Te mostraremos cómo encontrar y comprar una prenda fácilmente en nuestra tienda."
-    },
-    {
-      title: "Búsqueda",
-      content: "Arriba encontrarás el menú principal. Puedes escribir lo que buscas o usar el botón del micrófono para hablar."
-    },
-    {
-      title: "Accesibilidad",
-      content: "Abajo a la izquierda hay un botón con forma de ojo. Puedes cambiar el tamaño del texto, colores y contraste desde ahí."
-    },
-    {
-      title: "Catálogo",
-      content: "Usa los botones de opciones (filtros) para encontrar prendas más rápido."
-    },
-    {
-      title: "Prendas",
-      content: "Selecciona el color y tu talla antes de agregar una prenda a tu carrito."
-    },
-    {
-      title: "Carrito",
-      content: "Arriba a la derecha está tu carrito. Aquí puedes revisar, modificar o eliminar tus productos antes de pagar."
-    }
-  ];
-
-  const closeTour = () => {
+  const close = () => {
     setIsOpen(false);
-    setCurrentStep(0);
+    setStep(0);
+    stopSpeaking();
+    try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* sin almacenamiento */ }
   };
+  const cardRef = useFocusTrap(isOpen, close);
 
-  // Focus management and Escape key handling
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        closeTour();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      setTimeout(() => {
-        nextButtonRef.current?.focus();
-      }, 50);
-    } else {
-      document.removeEventListener('keydown', handleKeyDown);
-      if (openButtonRef.current) {
-        openButtonRef.current.focus();
-      }
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-      setTimeout(() => nextButtonRef.current?.focus(), 50);
-    } else {
-      closeTour();
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      setTimeout(() => nextButtonRef.current?.focus(), 50);
-    }
-  };
-
-
+    if (isOpen && voiceFeedback) speak(`${STEPS[step].title}. ${STEPS[step].content}`);
+  }, [isOpen, step, voiceFeedback]);
 
   if (!isOpen) {
     return (
-      <button 
-        ref={openButtonRef}
+      <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-secondary text-white p-4 rounded-full shadow-lg transition-transform flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-secondary/50 ${!reducedMotion ? 'hover:scale-105 animate-bounce' : 'hover:bg-secondary/90'}`}
-        aria-label="Abrir recorrido guiado"
+        className="fixed bottom-4 right-4 z-40 bg-secondary text-onPrimary min-h-[52px] pl-4 pr-5 rounded-full shadow-lg hover:opacity-90 flex items-center gap-2 font-bold"
       >
-        <Bot className="w-7 h-7" aria-hidden="true" />
+        <HelpCircle className="w-6 h-6" aria-hidden="true" />
+        Guía
       </button>
     );
   }
 
+  const last = step === STEPS.length - 1;
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity" 
-        onClick={closeTour}
-        aria-hidden="true"
-      ></div>
-
-      <div 
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 pointer-events-none"
-        style={{ fontSize: fontScale === 1.15 ? '1.05rem' : undefined }}
-      >
-        <div 
+      <div className="fixed inset-0 bg-black/60 z-50" onClick={close} aria-hidden="true"></div>
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pointer-events-none">
+        <div
           ref={cardRef}
           role="dialog"
           aria-modal="true"
-          aria-label={`Recorrido guiado: Paso ${currentStep + 1} de ${steps.length}`}
-          className={`bg-surface border border-border shadow-2xl rounded-3xl p-6 w-full max-w-md relative pointer-events-auto flex flex-col ${!reducedMotion ? 'animate-slide-up' : ''}`}
+          aria-labelledby="tour-title"
+          aria-describedby="tour-content"
+          className={`bg-surface border-2 border-borderStrong shadow-2xl rounded-3xl p-6 w-full max-w-lg pointer-events-auto flex flex-col ${!reducedMotion ? 'animate-slide-up' : ''}`}
         >
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-secondary/20 p-2.5 rounded-full" aria-hidden="true">
-                <Bot className="w-7 h-7 text-secondary" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-lg text-text leading-tight">Guía rápida</h3>
-                <p className="text-sm font-bold text-textMuted">Paso {currentStep + 1} de {steps.length}</p>
-              </div>
-            </div>
-            <button 
-              onClick={closeTour}
-              className="text-textMuted hover:text-text hover:bg-surfaceHover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label="Saltar recorrido"
-            >
+          <div className="flex justify-between items-center mb-4">
+            <p className="font-bold text-textMuted">Guía rápida · Paso {step + 1} de {STEPS.length}</p>
+            <button onClick={close} className="p-3 rounded-full hover:bg-surfaceHover" aria-label="Cerrar guía">
               <X className="w-6 h-6" aria-hidden="true" />
             </button>
           </div>
 
-          {/* Progress indicators visually */}
           <div className="flex gap-1.5 mb-6" aria-hidden="true">
-            {steps.map((_, idx) => (
-              <div 
-                key={idx} 
-                className={`h-2.5 rounded-full transition-all ${idx === currentStep ? 'w-10 bg-primary' : idx < currentStep ? 'w-4 bg-primary/40' : 'w-4 bg-border'}`}
-              />
+            {STEPS.map((_, i) => (
+              <div key={i} className={`h-2.5 flex-1 rounded-full ${i <= step ? 'bg-primary' : 'bg-border'}`} />
             ))}
           </div>
 
-          {/* Content */}
-          <div className="mb-8 min-h-[120px]">
-            <h4 className="font-extrabold text-2xl text-text mb-3">{steps[currentStep].title}</h4>
-            <p className="text-lg text-textMuted leading-relaxed">{steps[currentStep].content}</p>
-          </div>
+          <h2 id="tour-title" className="font-extrabold text-2xl text-text mb-3">{STEPS[step].title}</h2>
+          <p id="tour-content" className="text-lg text-text leading-relaxed mb-6">{STEPS[step].content}</p>
 
-          {/* Footer Controls */}
-          <div className="flex items-center justify-between mt-auto">
-            <button 
-              onClick={closeTour}
-              className="text-textMuted font-bold hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded px-2 py-1"
+          {canSpeak() && (
+            <button
+              onClick={() => speak(`${STEPS[step].title}. ${STEPS[step].content}`)}
+              className="self-start mb-6 inline-flex items-center gap-2 min-h-[48px] px-4 rounded-xl border-2 border-borderStrong font-bold hover:border-primary"
             >
-              Saltar
+              <Volume2 className="w-5 h-5" aria-hidden="true" /> Escuchar este paso
             </button>
-            
+          )}
+
+          <div className="flex items-center justify-between gap-3 mt-auto">
+            <button onClick={close} className="min-h-[48px] px-3 font-bold text-text underline underline-offset-4">Saltar</button>
             <div className="flex gap-3">
-              {currentStep > 0 && (
-                <button 
-                  onClick={handlePrev}
-                  className="flex items-center justify-center p-3 sm:px-5 sm:py-3 rounded-xl bg-background border border-border hover:bg-surfaceHover text-text font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50"
-                  aria-label="Paso anterior"
-                >
-                  <ArrowLeft className="w-5 h-5 sm:mr-2" aria-hidden="true" />
-                  <span className="hidden sm:inline">Anterior</span>
+              {step > 0 && (
+                <button onClick={() => setStep(step - 1)} className="min-h-[48px] flex items-center gap-2 px-5 rounded-xl bg-background border-2 border-borderStrong font-bold">
+                  <ArrowLeft className="w-5 h-5" aria-hidden="true" /> Anterior
                 </button>
               )}
-              <button 
-                ref={nextButtonRef}
-                onClick={handleNext}
-                className="flex items-center justify-center px-6 py-3 rounded-xl bg-primary hover:bg-primaryHover text-white font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50 shadow-premium"
+              <button
+                data-autofocus
+                onClick={() => (last ? close() : setStep(step + 1))}
+                className="min-h-[48px] flex items-center gap-2 px-6 rounded-xl bg-primary hover:bg-primaryHover text-onPrimary font-bold"
               >
-                {currentStep === steps.length - 1 ? (
-                  <>
-                    Finalizar <Check className="w-5 h-5 ml-2" aria-hidden="true" />
-                  </>
-                ) : (
-                  <>
-                    Siguiente <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
-                  </>
-                )}
+                {last ? <>Terminar <Check className="w-5 h-5" aria-hidden="true" /></> : <>Siguiente <ArrowRight className="w-5 h-5" aria-hidden="true" /></>}
               </button>
             </div>
           </div>

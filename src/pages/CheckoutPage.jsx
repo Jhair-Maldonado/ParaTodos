@@ -31,7 +31,7 @@ const MOCK_PAYMENT_METHODS = [
 
 const CheckoutPage = () => {
   const { items, getTotal, clearCart } = useCartStore();
-  const { reducedMotion, fontScale } = useAccessibilityStore();
+  const { reducedMotion } = useAccessibilityStore();
   
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -134,10 +134,10 @@ const CheckoutPage = () => {
   
   if (isSuccess) {
     return (
-      <main className={`container mx-auto px-4 py-16 text-center ${!reducedMotion ? 'animate-fade-in' : ''}`}>
+      <div className={`container mx-auto px-4 py-16 text-center ${!reducedMotion ? 'animate-fade-in' : ''}`}>
         <div className="max-w-xl mx-auto bg-surface border border-border p-8 rounded-3xl shadow-premium">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-green-600" aria-hidden="true" />
+          <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-12 h-12 text-success" aria-hidden="true" />
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-text mb-4">¡Compra confirmada!</h1>
           <p className="text-lg text-textMuted mb-8">
@@ -160,25 +160,25 @@ const CheckoutPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               to="/catalog" 
-              className="bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50"
+              className="bg-primary text-onPrimary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-colors"
             >
               Seguir comprando
             </Link>
             <Link 
               to="/" 
-              className="bg-background text-text border border-border px-8 py-4 rounded-xl font-bold text-lg hover:border-text transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50"
+              className="bg-background text-text border border-border px-8 py-4 rounded-xl font-bold text-lg hover:border-text transition-colors"
             >
               Volver al inicio
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <main className={`container mx-auto px-4 py-24 text-center ${!reducedMotion ? 'animate-fade-in' : ''}`}>
+      <div className={`container mx-auto px-4 py-24 text-center ${!reducedMotion ? 'animate-fade-in' : ''}`}>
         <ShoppingBag className="w-24 h-24 text-textMuted mx-auto mb-6 opacity-30" aria-hidden="true" />
         <h1 className="text-4xl font-extrabold text-text mb-4">Tu carrito está vacío</h1>
         <p className="text-xl text-textMuted mb-8 max-w-md mx-auto">
@@ -186,11 +186,11 @@ const CheckoutPage = () => {
         </p>
         <Link 
           to="/catalog" 
-          className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50 shadow-premium"
+          className="inline-flex items-center gap-2 bg-primary text-onPrimary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-colors shadow-premium"
         >
           Explorar catálogo
         </Link>
-      </main>
+      </div>
     );
   }
 
@@ -202,11 +202,10 @@ const CheckoutPage = () => {
   const getSelectedPayment = () => MOCK_PAYMENT_METHODS.find(m => m.id === selectedPaymentId);
 
   return (
-    <main 
+    <div 
       className={`container mx-auto px-4 py-8 lg:py-12 ${!reducedMotion ? 'animate-fade-in' : ''}`}
-      style={{ fontSize: fontScale === 1.15 ? '1.05rem' : undefined }}
     >
-      <h1 className="sr-only">Proceso de pago por pasos</h1>
+      <h1 className="text-3xl md:text-4xl font-extrabold text-text mb-8 max-w-6xl mx-auto">Finaliza tu compra</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 max-w-6xl mx-auto">
         
@@ -232,9 +231,9 @@ const CheckoutPage = () => {
                     <span 
                       className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg border-4 transition-colors ${
                         isCompleted 
-                          ? 'bg-primary border-background text-white' 
+                          ? 'bg-primary border-background text-onPrimary' 
                           : isCurrent 
-                            ? 'bg-primary border-primary/20 text-white shadow-md' 
+                            ? 'bg-primary border-primary/20 text-onPrimary shadow-md' 
                             : 'bg-surface border-border text-textMuted'
                       }`}
                       aria-current={isCurrent ? 'step' : undefined}
@@ -276,7 +275,7 @@ const CheckoutPage = () => {
                         <input 
                           type="radio" 
                           name="addressOption" 
-                          className="w-5 h-5 text-primary focus:ring-0 cursor-pointer"
+                          className="w-5 h-5 text-primary cursor-pointer"
                           checked={useSavedAddress} 
                           onChange={() => setUseSavedAddress(true)}
                         />
@@ -298,7 +297,7 @@ const CheckoutPage = () => {
                         <input 
                           type="radio" 
                           name="addressOption" 
-                          className="w-5 h-5 text-primary focus:ring-0 cursor-pointer"
+                          className="w-5 h-5 text-primary cursor-pointer"
                           checked={!useSavedAddress} 
                           onChange={() => setUseSavedAddress(false)}
                         />
@@ -323,7 +322,7 @@ const CheckoutPage = () => {
                         type="text"
                         value={deliveryData.fullName}
                         onChange={handleInputChange}
-                        className={`w-full bg-surface border p-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/50 transition-colors ${errors.fullName ? 'border-error' : 'border-border hover:border-border/80'}`}
+                        className={`w-full bg-surface border p-4 rounded-xl transition-colors ${errors.fullName ? 'border-error' : 'border-border hover:border-border/80'}`}
                         aria-invalid={!!errors.fullName}
                         aria-describedby={errors.fullName ? "fullName-error" : undefined}
                       />
@@ -345,7 +344,7 @@ const CheckoutPage = () => {
                           type="text"
                           value={deliveryData.address}
                           onChange={handleInputChange}
-                          className={`w-full bg-surface border p-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/50 transition-colors ${errors.address ? 'border-error' : 'border-border hover:border-border/80'}`}
+                          className={`w-full bg-surface border p-4 rounded-xl transition-colors ${errors.address ? 'border-error' : 'border-border hover:border-border/80'}`}
                           aria-invalid={!!errors.address}
                           aria-describedby={errors.address ? "address-error" : undefined}
                         />
@@ -366,7 +365,7 @@ const CheckoutPage = () => {
                           type="text"
                           value={deliveryData.district}
                           onChange={handleInputChange}
-                          className={`w-full bg-surface border p-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/50 transition-colors ${errors.district ? 'border-error' : 'border-border hover:border-border/80'}`}
+                          className={`w-full bg-surface border p-4 rounded-xl transition-colors ${errors.district ? 'border-error' : 'border-border hover:border-border/80'}`}
                           aria-invalid={!!errors.district}
                           aria-describedby={errors.district ? "district-error" : undefined}
                         />
@@ -387,7 +386,7 @@ const CheckoutPage = () => {
                           type="tel"
                           value={deliveryData.phone}
                           onChange={handleInputChange}
-                          className={`w-full bg-surface border p-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/50 transition-colors ${errors.phone ? 'border-error' : 'border-border hover:border-border/80'}`}
+                          className={`w-full bg-surface border p-4 rounded-xl transition-colors ${errors.phone ? 'border-error' : 'border-border hover:border-border/80'}`}
                           aria-invalid={!!errors.phone}
                           aria-describedby={errors.phone ? "phone-error" : undefined}
                         />
@@ -404,7 +403,7 @@ const CheckoutPage = () => {
                 <div className="mt-8 flex justify-end">
                   <button 
                     type="submit"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-all focus:outline-none focus:ring-4 focus:ring-primary/50 shadow-premium"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-onPrimary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-all shadow-premium"
                   >
                     Continuar al pago <ArrowRight className="w-5 h-5" aria-hidden="true" />
                   </button>
@@ -440,7 +439,7 @@ const CheckoutPage = () => {
                             type="radio" 
                             name="paymentMethod" 
                             value={method.id}
-                            className="w-5 h-5 text-primary focus:ring-0 cursor-pointer"
+                            className="w-5 h-5 text-primary cursor-pointer"
                             checked={selectedPaymentId === method.id} 
                             onChange={() => {
                               setSelectedPaymentId(method.id);
@@ -466,13 +465,13 @@ const CheckoutPage = () => {
                   <button 
                     type="button"
                     onClick={handlePrevStep}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-textMuted hover:text-text font-bold px-6 py-4 rounded-xl border border-border hover:bg-surfaceHover transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-textMuted hover:text-text font-bold px-6 py-4 rounded-xl border border-border hover:bg-surfaceHover transition-colors"
                   >
                     <ArrowLeft className="w-5 h-5" aria-hidden="true" /> Atrás
                   </button>
                   <button 
                     type="submit"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-all focus:outline-none focus:ring-4 focus:ring-primary/50 shadow-premium"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-onPrimary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryHover transition-all shadow-premium"
                   >
                     Revisar pedido <ArrowRight className="w-5 h-5" aria-hidden="true" />
                   </button>
@@ -500,7 +499,7 @@ const CheckoutPage = () => {
                       </h3>
                       <button 
                         onClick={() => { setStep(1); scrollToTop(); }}
-                        className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded px-2 py-1 -mr-2 -mt-1"
+                        className="text-primary font-bold hover:underline rounded px-2 py-1 -mr-2 -mt-1"
                       >
                         Editar
                       </button>
@@ -522,7 +521,7 @@ const CheckoutPage = () => {
                       </h3>
                       <button 
                         onClick={() => { setStep(2); scrollToTop(); }}
-                        className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded px-2 py-1 -mr-2 -mt-1"
+                        className="text-primary font-bold hover:underline rounded px-2 py-1 -mr-2 -mt-1"
                       >
                         Editar
                       </button>
@@ -538,14 +537,14 @@ const CheckoutPage = () => {
                     type="button"
                     onClick={handlePrevStep}
                     disabled={isProcessing}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-textMuted hover:text-text font-bold px-6 py-4 rounded-xl border border-border hover:bg-surfaceHover transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50 disabled:opacity-50"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-textMuted hover:text-text font-bold px-6 py-4 rounded-xl border border-border hover:bg-surfaceHover transition-colors disabled:opacity-50"
                   >
                     <ArrowLeft className="w-5 h-5" aria-hidden="true" /> Atrás
                   </button>
                   <button 
                     onClick={handleConfirmPurchase}
                     disabled={isProcessing}
-                    className={`w-full sm:w-auto flex items-center justify-center gap-2 bg-green-600 text-white px-10 py-5 rounded-xl font-extrabold text-xl transition-all focus:outline-none focus:ring-4 focus:ring-green-600/50 shadow-premium ${isProcessing ? 'opacity-90 cursor-wait' : 'hover:bg-green-700'}`}
+                    className={`w-full sm:w-auto flex items-center justify-center gap-2 bg-success text-onPrimary px-10 py-5 rounded-xl font-extrabold text-xl transition-all  shadow-premium ${isProcessing ? 'opacity-90 cursor-wait' : 'hover:opacity-90'}`}
                     aria-live="polite"
                   >
                     {isProcessing ? (
@@ -597,7 +596,7 @@ const CheckoutPage = () => {
             {/* Si estamos editando pasos 1 o 2, permitir ir al catálogo/carrito, sino, ocultar para no distraer */}
             {step < 3 && (
               <div className="mb-6 pb-6 border-b border-border text-sm">
-                <Link to="/catalog" className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded px-1">
+                <Link to="/catalog" className="text-primary font-bold hover:underline rounded px-1">
                   Editar carrito
                 </Link>
               </div>
@@ -622,7 +621,7 @@ const CheckoutPage = () => {
         </aside>
 
       </div>
-    </main>
+    </div>
   );
 };
 

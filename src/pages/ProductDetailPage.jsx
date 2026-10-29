@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, ShoppingCart, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Check, ShoppingCart, AlertCircle, Volume2 } from 'lucide-react';
 import { allProducts } from '../data/products';
 import useCartStore from '../store/cartStore';
 import useAccessibilityStore from '../store/accessibilityStore';
+import { speak, canSpeak } from '../utils/speech';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addItem, openDrawer } = useCartStore();
-  const { reducedMotion, fontScale } = useAccessibilityStore();
+  const { addItem } = useCartStore();
+  const { voiceFeedback } = useAccessibilityStore();
 
   const [product, setProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -59,17 +60,26 @@ const ProductDetailPage = () => {
       selectedSize: selectedSize.name,
     });
     
-    openDrawer(); // Show drawer
-    setAddedSuccess(true); // Local feedback
+    setAddedSuccess(true);
+    if (voiceFeedback) speak(`Agregaste ${product.name}, color ${selectedColor.name}, talla ${selectedSize.name}, al carrito.`);
+  };
+
+  // Descripción hablada: nombre, precio, color elegido y tallas disponibles/agotadas
+  const readAloud = () => {
+    const available = product.sizes.filter((s) => s.available !== false).map((s) => s.name).join(', ');
+    const soldOut = product.sizes.filter((s) => s.available === false).map((s) => s.name).join(', ');
+    speak(`${product.name}. Precio ${product.price.toFixed(2)} soles. Color seleccionado: ${selectedColor?.name}. ` +
+      `Otros colores: ${product.colors.filter((c) => c.id !== selectedColor?.id).map((c) => c.name).join(', ') || 'ninguno'}. ` +
+      `Tallas disponibles: ${available}.${soldOut ? ` Agotada: ${soldOut}.` : ''} ${product.description || ''}`);
   };
 
   return (
-    <main className={`container mx-auto px-4 py-8 ${!reducedMotion ? 'animate-fade-in' : ''}`}>
+    <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb / Volver */}
       <nav className="mb-6" aria-label="Navegación secundaria">
         <Link 
           to="/catalog" 
-          className="inline-flex items-center gap-2 text-textMuted hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded-lg px-2 py-1 -ml-2 font-medium"
+          className="inline-flex items-center gap-2 text-textMuted hover:text-primary transition-colors rounded-lg px-2 py-1 -ml-2 font-medium"
         >
           <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           Volver al catálogo
@@ -78,14 +88,14 @@ const ProductDetailPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
         {/* Columna Izquierda: Visual del Producto */}
-        <section aria-label="Imágenes del producto">
+        <section aria-label="Imagen de referencia del producto">
           <div 
             className={`w-full aspect-[4/5] rounded-3xl ${selectedColor ? selectedColor.class : product.imageColor} flex items-center justify-center p-8 border border-border shadow-premium transition-colors duration-300 relative overflow-hidden`}
           >
             {/* Visual decorativo */}
-            <div aria-hidden="true" className="absolute inset-0 w-full h-full bg-black/10 backdrop-blur-sm flex items-center justify-center">
-              <span className="text-white/90 font-bold text-2xl drop-shadow-md tracking-wider">
-                {product.name}
+            <div aria-hidden="true" className="absolute inset-0 w-full h-full flex items-start justify-start p-6">
+              <span className="bg-surface text-text font-bold text-xl px-4 py-2 rounded-full shadow">
+                {selectedColor?.name}
               </span>
             </div>
           </div>
@@ -97,9 +107,18 @@ const ProductDetailPage = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold text-text mb-2 leading-tight">
               {product.name}
             </h1>
-            <p className="text-3xl font-bold text-primary" aria-label={`Precio: S/ ${product.price.toFixed(2)}`}>
-              S/ {product.price.toFixed(2)}
+            <p className="text-3xl font-bold text-primary">
+              <span className="sr-only">Precio: </span>S/ {product.price.toFixed(2)}
             </p>
+            {canSpeak() && (
+              <button
+                type="button"
+                onClick={readAloud}
+                className="mt-4 inline-flex items-center gap-2 min-h-[48px] px-5 rounded-xl border-2 border-borderStrong font-bold text-text hover:border-primary"
+              >
+                <Volume2 className="w-5 h-5" aria-hidden="true" /> Escuchar descripción
+              </button>
+            )}
           </div>
 
           {/* Selección de Color */}
@@ -117,7 +136,7 @@ const ProductDetailPage = () => {
                       type="button"
                       onClick={() => setSelectedColor(color)}
                       aria-pressed={isSelected}
-                      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-4 focus:ring-primary/50 ${
+                      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all ${
                         isSelected 
                           ? 'border-primary bg-primary/5 shadow-md' 
                           : 'border-border bg-surface hover:border-primary/50 hover:bg-surfaceHover'
@@ -159,20 +178,17 @@ const ProductDetailPage = () => {
                       onClick={() => isAvailable && setSelectedSize(size)}
                       disabled={!isAvailable}
                       aria-pressed={isSelected}
-                      aria-disabled={!isAvailable}
-                      title={!isAvailable ? `La talla ${size.name} está agotada` : `Seleccionar talla ${size.name}`}
-                      className={`min-w-[3.5rem] h-14 px-4 flex items-center justify-center rounded-xl border-2 font-bold text-lg transition-all focus:outline-none focus:ring-4 focus:ring-primary/50 ${
+                      className={`min-w-[4rem] min-h-[56px] px-4 flex flex-col items-center justify-center rounded-xl border-2 font-bold text-lg transition-colors ${
                         !isAvailable
-                          ? 'border-border/50 bg-background text-textMuted/50 cursor-not-allowed opacity-60'
+                          ? 'border-dashed border-borderStrong bg-background text-textMuted cursor-not-allowed'
                           : isSelected
-                            ? 'border-primary bg-primary text-white shadow-md'
-                            : 'border-border bg-surface text-text hover:border-primary/50 hover:bg-surfaceHover'
+                            ? 'border-primary bg-primary text-onPrimary shadow-md'
+                            : 'border-borderStrong bg-surface text-text hover:border-primary hover:bg-surfaceHover'
                       }`}
                     >
-                      {size.name}
-                      <span className="sr-only">
-                        {!isAvailable ? ' - Agotado' : isSelected ? ' - Seleccionado' : ''}
-                      </span>
+                      <span className={!isAvailable ? 'line-through' : ''}>{size.name}</span>
+                      {!isAvailable && <span className="text-xs font-semibold leading-none">Agotada</span>}
+                      {isSelected && <span className="sr-only"> (seleccionada)</span>}
                     </button>
                   );
                 })}
@@ -182,7 +198,7 @@ const ProductDetailPage = () => {
 
           {/* Error Message */}
           {error && (
-            <div className={`mb-6 p-4 rounded-xl bg-error/10 border-l-4 border-error flex items-start gap-3 ${!reducedMotion ? 'animate-fade-in' : ''}`} role="alert" aria-live="assertive">
+            <div className="mb-6 p-4 rounded-xl bg-error/10 border-l-4 border-error flex items-start gap-3" role="alert" aria-live="assertive">
               <AlertCircle className="w-6 h-6 text-error shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-error font-medium">{error}</p>
             </div>
@@ -190,24 +206,20 @@ const ProductDetailPage = () => {
 
           {/* Success Message */}
           {addedSuccess && (
-            <div className={`mb-6 p-4 rounded-xl bg-green-100 border-l-4 border-green-600 flex items-start gap-3 ${!reducedMotion ? 'animate-fade-in' : ''}`} role="status" aria-live="polite">
-              <Check className="w-6 h-6 text-green-700 shrink-0 mt-0.5" aria-hidden="true" />
-              <p className="text-green-800 font-medium font-bold">¡{product.name} añadido al carrito!</p>
+            <div className="mb-6 p-4 rounded-xl bg-success/10 border-l-4 border-success flex items-start gap-3" role="status" aria-live="polite">
+              <Check className="w-6 h-6 text-success shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="text-text font-bold">Agregaste {product.name} ({selectedColor?.name}, talla {selectedSize?.name}) al carrito.</p>
             </div>
           )}
 
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className={`w-full py-4 px-8 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 transition-all focus:outline-none focus:ring-4 focus:ring-primary/50 mb-12 ${
+            className={`w-full py-4 px-8 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 transition-all mb-12 ${
               addedSuccess
-                ? 'bg-green-600 text-white hover:bg-green-700 shadow-md'
-                : 'bg-primary text-white hover:bg-primaryHover shadow-premium hover:shadow-lg hover:-translate-y-1'
+                ? 'bg-success text-onPrimary shadow-md'
+                : 'bg-primary text-onPrimary hover:bg-primaryHover shadow-premium'
             }`}
-            style={{ 
-              transform: reducedMotion ? 'none' : undefined,
-              fontSize: fontScale === 1.15 ? '1.1rem' : undefined
-            }}
           >
             <ShoppingCart className="w-6 h-6" aria-hidden="true" />
             {addedSuccess ? 'Agregar otro' : 'Agregar al carrito'}
@@ -244,7 +256,7 @@ const ProductDetailPage = () => {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 
